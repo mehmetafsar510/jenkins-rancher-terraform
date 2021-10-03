@@ -1,0 +1,20 @@
+nodes:
+  - address: {{public}}
+    internal_address: {{private}}
+    user: ubuntu
+    role: [controlplane, worker, etcd]
+
+services:
+  etcd:
+    snapshot: true
+    creation: 6h
+    retention: 24h
+
+ssh_key_path: /var/lib/jenkins/.ssh/the-doctor.pem
+
+# Required for external TLS termination with
+# ingress-nginx v0.22+
+ingress:
+  provider: nginx
+  options:
+    use-forwarded-headers: "true"
