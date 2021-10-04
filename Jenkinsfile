@@ -339,8 +339,8 @@ pipeline {
                 echo 'Deploying App on K8s Cluster'
                 sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
                 sh "rancher kubectl apply -f  storage-class.yaml"
-                sh "rancher kubectl apply --namespace -f result"
-                sh "rancher kubectl apply --namespace -f kubernetes"
+                sh "rancher kubectl apply -f result"
+                sh "rancher kubectl apply -f kubernetes"
             }
         }
         
