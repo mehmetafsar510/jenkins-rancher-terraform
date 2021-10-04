@@ -14,18 +14,6 @@ locals {
           protocol    = -1
           cidr_blocks = [var.access_ip]
         }
-        tg = {
-          from        = 30002
-          to          = 30002
-          protocol    = "tcp"
-          cidr_blocks = ["0.0.0.0/0"]
-        }
-        tg2 = {
-          from        = 30001
-          to          = 30001
-          protocol    = "tcp"
-          cidr_blocks = ["0.0.0.0/0"]
-        }
         http = {
           from        = 80
           to          = 80
@@ -43,17 +31,13 @@ locals {
           from        = 6443
           to          = 6443
           protocol    = "tcp"
-          cidr_blocks = ["{{jenkinsip}}/32"] #jenkins server sec group
+          cidr_blocks = ["0.0.0.0/0"] #jenkins server sec group
         }
         ssh = {
           from        = 22
           to          = 22
           protocol    = "tcp"
-          cidr_blocks = ["{{jenkinsip}}/32"] #jenkins server sec group
-        }
-
-        tags = {
-            "kubernetes.io/cluster/MikeCluster" = "owned"
+          cidr_blocks = ["0.0.0.0/0"] #jenkins server sec group
         }
       }
     }

@@ -114,4 +114,7 @@ resource "aws_security_group" "mtc_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = {
+          "kubernetes.io/cluster/MikeCluster" = "owned"
+        }
 }

@@ -19,8 +19,7 @@ module "loadbalancing" {
   source                  = "./modules/loadbalancing"
   public_sg               = module.networking.loadbalancer_security_group
   public_subnets          = module.networking.public_subnets
-  tg_port1                = 30002
-  tg_port2                = 30001
+  tg_port                 = 80
   tg_protocol             = "HTTP"
   vpc_id                  = module.networking.vpc_id
   elb_healthy_threshold   = 2
@@ -33,25 +32,22 @@ module "loadbalancing" {
 }
 
 module "compute" {
-  source               = "./modules/compute"
-  public_sg            = module.networking.public_sg
-  public_subnets       = module.networking.public_subnets
+  source              = "./modules/compute"
+  public_sg           = module.networking.public_sg
+  public_subnets      = module.networking.public_subnets
   master_profile_name = module.iam.master_profile_name
-  instance_count       = 1
-  instance_type        = "t2.small"
-  vol_size             = "20"
-  public_key_path      = "/var/lib/jenkins/.ssh/{{keypairpub}}"
-  key_name             = "{{keypair}}"
-  dbname               = var.dbname
-  dbuser               = var.dbuser
-  dbpassword           = var.dbpassword
-  db_endpoint          = module.database.db_endpoint
-  user_data_path       = "${path.root}/userdata.sh"
-  lb_target_group_arn1 = module.loadbalancing.lb_target_group_arn1
-  lb_target_group_arn2 = module.loadbalancing.lb_target_group_arn2
-  tg_port1             = 30002
-  tg_port2             = 30001
-  private_key_path     = "/var/lib/jenkins/.ssh/{{keypairpem}}"
+  instance_count      = 1
+  instance_type       = "t2.small"
+  vol_size            = "20"
+  public_key_path     = "~/.ssh/the-doctor.pub"
+  key_name            = "the-doctor"
+  user_data_path      = "${path.root}/userdata.sh"
+  lb_target_group_arn = module.loadbalancing.lb_target_group_arn
+  tg_port             = 80
+}
+
+module "iam" {
+  source = "./modules/IAM"
 }
 
 module "route53" {

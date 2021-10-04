@@ -7,26 +7,9 @@ resource "aws_lb" "mtc_lb" {
   idle_timeout    = 400
 }
 
-resource "aws_lb_target_group" "mtc_tg_1" {
+resource "aws_lb_target_group" "mtc_tg" {
   name     = "mtc-lb-tg-${substr(uuid(), 0, 3)}"
-  port     = var.tg_port1
-  protocol = var.tg_protocol
-  vpc_id   = var.vpc_id
-  lifecycle {
-    create_before_destroy = true
-    ignore_changes        = [name]
-  }
-  health_check {
-    healthy_threshold   = var.elb_healthy_threshold
-    unhealthy_threshold = var.elb_unhealthy_threshold
-    timeout             = var.elb_timeout
-    interval            = var.elb_interval
-  }
-}
-
-resource "aws_lb_target_group" "mtc_tg_2" {
-  name     = "mtc-lb-tg-${substr(uuid(), 0, 3)}"
-  port     = var.tg_port2
+  port     = var.tg_port
   protocol = var.tg_protocol
   vpc_id   = var.vpc_id
   lifecycle {
@@ -62,34 +45,6 @@ resource "aws_lb_listener" "mtc_lb_listener_1" {
   certificate_arn   = var.certificate_arn_elb
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.mtc_tg_1.arn
-  }
-}
-
-resource "aws_alb_listener_rule" "listener_rule1" {  
-  listener_arn = "${aws_lb_listener.mtc_lb_listener_1.arn}"  
-  priority     = "1"   
-  action {    
-    type             = "forward"    
-    target_group_arn = "${aws_lb_target_group.mtc_tg_1.id}"  
-  }   
-  condition {
-    path_pattern {
-      values = ["/"]
-    }
-  }
-}
-
-resource "aws_alb_listener_rule" "listener_rule2" {
-  listener_arn = "${aws_lb_listener.mtc_lb_listener_1.arn}"  
-  priority     = "2"   
-  action {    
-    type             = "forward"    
-    target_group_arn = "${aws_lb_target_group.mtc_tg_2.id}"  
-  }   
-  condition {
-    path_pattern {
-      values = ["/choose", "/add", "/delete", "/update"]
-    }
+    target_group_arn = aws_lb_target_group.mtc_tg.arn
   }
 }

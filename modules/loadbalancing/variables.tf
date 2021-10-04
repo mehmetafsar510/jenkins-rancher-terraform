@@ -1,7 +1,7 @@
 variable "public_sg" {}
 variable "public_subnets" {}
-variable "tg_port1" {}
-variable "tg_port2" {}
+variable "tg_port" {}
+
 variable "tg_protocol" {}
 variable "vpc_id" {}
 variable "elb_healthy_threshold" {}
