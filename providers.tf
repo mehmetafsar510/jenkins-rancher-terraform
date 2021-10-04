@@ -5,7 +5,7 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "drmehmetafsar-terraform"
+    bucket = "mehmetafsar.com"
     key    = "prod/terraform.tfstate"
     region = "us-east-1"
   }

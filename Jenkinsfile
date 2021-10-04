@@ -242,7 +242,6 @@ pipeline {
             steps{
                 withAWS(credentials: 'mycredentials', region: 'us-east-1') {
                     sh "sed -i 's|{{keypair}}|${CFN_KEYPAIR}|g' main.tf"
-                    sh "sed -i 's|{{keypairpem}}|${CFN_KEYPAIR}.pem|g' main.tf"
                     sh "sed -i 's|{{keypairpub}}|${CFN_KEYPAIR}.pub|g' main.tf"
                     sh "JENKINS_IP=curl http://169.254.169.254/latest/meta-data/public-ipv4"
                     sh "sed -i 's|{{jenkinsip}}|${JENKINS_IP}|g' locals.tf"

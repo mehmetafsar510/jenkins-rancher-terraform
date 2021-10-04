@@ -31,13 +31,13 @@ locals {
           from        = 6443
           to          = 6443
           protocol    = "tcp"
-          cidr_blocks = ["0.0.0.0/0"] #jenkins server sec group
+          cidr_blocks = ["0.0.0.0/0"] #jenkins server ip
         }
         ssh = {
           from        = 22
           to          = 22
           protocol    = "tcp"
-          cidr_blocks = ["0.0.0.0/0"] #jenkins server sec group
+          cidr_blocks = ["0.0.0.0/0"] #jenkins server ip
         }
       }
     }

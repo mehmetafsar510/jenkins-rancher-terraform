@@ -17,7 +17,6 @@ module "networking" {
 
 module "loadbalancing" {
   source                  = "./modules/loadbalancing"
-  public_sg               = module.networking.loadbalancer_security_group
   public_subnets          = module.networking.public_subnets
   tg_port                 = 80
   tg_protocol             = "HTTP"
@@ -39,8 +38,8 @@ module "compute" {
   instance_count      = 1
   instance_type       = "t2.small"
   vol_size            = "20"
-  public_key_path     = "~/.ssh/the-doctor.pub"
-  key_name            = "the-doctor"
+  public_key_path     = "~/.ssh/id_rsa.pub"
+  key_name            = "id_rsa"
   user_data_path      = "${path.root}/userdata.sh"
   lb_target_group_arn = module.loadbalancing.lb_target_group_arn
   tg_port             = 80

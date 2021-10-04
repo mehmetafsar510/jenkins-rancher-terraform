@@ -20,7 +20,7 @@ echo \
 # Update packages
 apt-get update -y
 # List the versions available in your repo
-apt-cache madison docker-ce -y
+apt-cache madison docker-ce
 
 # Since Rancher is not compatible (yet) with latest version of Docker install version 19.03.15 or earlier version using the version string (exp: 5:19.03.15~3-0~ubuntu-focal) from the second column
 apt-get install docker-ce=18.06.1~ce~3-0~ubuntu containerd.io -y
