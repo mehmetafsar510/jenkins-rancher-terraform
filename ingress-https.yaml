@@ -2,7 +2,13 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: path-based-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt
 spec:
+  tls:
+    - hosts:
+      -  {{FQDN}}
+      secretName: {{SEC_NAME}}
   rules:
     - host: {{FQDN}}
       http:
@@ -27,3 +33,4 @@ spec:
           backend:
               serviceName: search-flask
               servicePort: 80
+
