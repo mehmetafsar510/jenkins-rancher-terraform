@@ -7,7 +7,7 @@ Description: >
   using using IAM role.
   Jenkins Server is also upgraded to AWS CLI Version 2 to enable ECR commands.
   Jenkins Server will run on Amazon Linux 2 EC2 Instance with
-  custom security group allowing HTTP(80, 8080) and SSH (22) connections from anywhere.
+  custom security group allowing HTTP(80, 8080) and SSH (22) connections from anywhere..
 
 Parameters:
   KeyPairName:
