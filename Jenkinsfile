@@ -327,7 +327,7 @@ pipeline {
                             --namespace cattle-system \
                             --set hostname=$FQDN \
                             --set tls=external \
-                            --set replicas=2
+                            --set replicas=1
                         '''
                     }
                 }
