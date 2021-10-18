@@ -18,8 +18,8 @@ pipeline {
         APP_REPO = "phonebook/app"
         APP_REPO_NAME = "mehmetafsar510"
         CLUSTER_NAME = "mehmet-cluster"
-        FQDN = "rancher.mehmetafsar.com"
-        DOMAIN_NAME = "mehmetafsar.com"
+        FQDN = "rancher.mehmetafsar.net"
+        DOMAIN_NAME = "mehmetafsar.net"
         NM_SP = "phone"
         GIT_FOLDER = sh(script:'echo ${GIT_URL} | sed "s/.*\\///;s/.git$//"', returnStdout:true).trim()
     }
