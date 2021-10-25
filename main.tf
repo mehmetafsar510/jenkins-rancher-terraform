@@ -36,7 +36,7 @@ module "compute" {
   public_subnets      = module.networking.public_subnets
   master_profile_name = module.iam.master_profile_name
   instance_count      = 1
-  instance_type       = "t2.small"
+  instance_type       = "t2.medium"
   vol_size            = "20"
   public_key_path     = "/var/lib/jenkins/.ssh/{{keypairpub}}"
   key_name            = "{{keypair}}"
