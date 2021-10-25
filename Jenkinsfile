@@ -74,6 +74,7 @@ pipeline {
                     if [ "$RDS" == '' ]
                     then
                         aws rds create-db-instance \
+                          --region ${AWS_REGION} \
                           --db-instance-identifier mysql-instance \
                           --db-instance-class db.t2.micro \
                           --engine mysql \
