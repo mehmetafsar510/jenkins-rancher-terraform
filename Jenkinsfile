@@ -9,7 +9,7 @@ pipeline {
         RANCHER_URL="https://rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
         RANCHER_CONTEXT="phonebook-cluster:project-id" 
-        RANCHER_CREDS=credentials('rancher-phonebook-credentials')
+        //RANCHER_CREDS=credentials('rancher-phonebook-credentials')
         CFN_KEYPAIR="the-doctor"
         MYSQL_DATABASE_PASSWORD = "Clarusway"
         MYSQL_DATABASE_USER = "admin"
