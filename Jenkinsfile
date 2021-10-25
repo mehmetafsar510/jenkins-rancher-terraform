@@ -70,7 +70,7 @@ pipeline {
             steps{
                 echo 'creating RDS for test stage'
                 sh '''
-                    RDS=$(aws rds describe-db-instances | grep mysql-instance |cut -d '"' -f 4| head -n 1)  || true
+                    RDS=$(aws rds describe-db-instances --region ${AWS_REGION}  | grep mysql-instance |cut -d '"' -f 4| head -n 1)  || true
                     if [ "$RDS" == '' ]
                     then
                         aws rds create-db-instance \
