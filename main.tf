@@ -38,7 +38,6 @@ module "compute" {
   instance_count      = 1
   instance_type       = "t2.medium"
   vol_size            = "20"
-  public_key_path     = "/var/lib/jenkins/.ssh/{{keypairpub}}"
   key_name            = "{{keypair}}"
   user_data_path      = "${path.root}/userdata.sh"
   lb_target_group_arn = module.loadbalancing.lb_target_group_arn
