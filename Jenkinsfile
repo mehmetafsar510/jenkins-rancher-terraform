@@ -334,6 +334,7 @@ pipeline {
                             --set tls=external \
                             --set replicas=2
                         '''
+                        sh "kubectl -n cattle-system get deploy rancher"
                     }
                 }
 
