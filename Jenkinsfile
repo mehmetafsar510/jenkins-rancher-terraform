@@ -6,7 +6,7 @@ pipeline {
         AWS_ACCOUNT_ID=sh(script:'export PATH="$PATH:/usr/local/bin" && aws sts get-caller-identity --query Account --output text', returnStdout:true).trim()
         AWS_REGION="us-east-1"
         ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        RANCHER_URL="https://rancher.mehmetafsar.com"
+        RANCHER_URL="https://rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
         RANCHER_CONTEXT="phonebook-cluster:project-id" 
         RANCHER_CREDS=credentials('rancher-phonebook-credentials')
@@ -18,7 +18,7 @@ pipeline {
         APP_REPO = "phonebook/app"
         APP_REPO_NAME = "mehmetafsar510"
         CLUSTER_NAME = "mehmet-cluster"
-        FQDN = "rancher.mehmetafsar.net"
+        FQDN = "phonebook.mehmetafsar.net"
         DOMAIN_NAME = "mehmetafsar.net"
         NM_SP = "phone"
         GIT_FOLDER = sh(script:'echo ${GIT_URL} | sed "s/.*\\///;s/.git$//"', returnStdout:true).trim()
@@ -39,6 +39,11 @@ pipeline {
                   sudo mv ./kubectl /usr/local/bin
                   sudo mv rke_linux-amd64 /usr/local/bin/rke
                   ./get_helm.sh
+                  curl -SsL "https://github.com/rancher/cli/releases/download/v2.4.9/rancher-linux-amd64-v2.4.9.tar.gz" -o "rancher-cli.tar.gz"
+                  tar -zxvf rancher-cli.tar.gz
+                  sudo mv ./rancher-v2.4.9/rancher /usr/local/bin/rancher
+                  chmod +x /usr/local/bin/rancher
+                  rancher --version
                 """
               }
             }
@@ -85,7 +90,7 @@ pipeline {
                         echo "RDS is not UP and running yet. Will try to reach again after 10 seconds..."
                         sleep(10)
 
-                        endpoint = sh(script:'aws rds describe-db-instances --region ${AWS_REGION} --query DBInstances[*].Endpoint.Address --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()
+                        endpoint = sh(script:'aws rds describe-db-instances --region ${AWS_REGION} --db-instance-identifier mysql-instance --query DBInstances[*].Endpoint.Address --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()
 
                         if (endpoint.length() >= 7) {
                             echo "My Database Endpoint Address Found: $endpoint"
@@ -213,7 +218,7 @@ pipeline {
             agent any
             steps{
                 sh '''
-                    if [ -f "${WORKSPACE}/.ssh/${CFN_KEYPAIR}.pem" ]
+                    if [ -f "${CFN_KEYPAIR}.pem" ]
                     then 
                         echo "file exists..."
                     else
@@ -325,12 +330,33 @@ pipeline {
                         sh '''
                         helm install rancher rancher-latest/rancher \
                             --namespace cattle-system \
-                            --set hostname=$FQDN \
+                            --set hostname=$RANCHER_URL \
                             --set tls=external \
                             --set replicas=2
                         '''
                     }
                 }
+
+        stage('Test login rancher cluster') {
+            steps {
+                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                    echo "Testing if the K8s cluster is ready or not"
+                script {
+                    while(true) {
+                        try {
+                          sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
+                          echo "Successfully login Rancher cluster."
+                          break
+                        }
+                        catch(Exception) {
+                          echo 'Could not login cluster please wait'
+                          sleep(5)  
+                        } 
+                    }
+                }
+            }
+        }
+    }
 
 
         stage('Deploy App on  Kubernetes Cluster'){
