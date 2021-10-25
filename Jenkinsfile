@@ -332,6 +332,7 @@ pipeline {
 
                         fi
                         '''
+                        sh "helm uninstall rancher --namespace cattle-system"
                         sh '''
                         helm install rancher rancher-latest/rancher \
                             --namespace cattle-system \
