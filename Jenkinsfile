@@ -7,6 +7,7 @@ pipeline {
         AWS_REGION="us-east-1"
         ECR_REGISTRY="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         RANCHER_URL="https://rancher.mehmetafsar.net"
+        RANCHER="rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
         RANCHER_CONTEXT="phonebook-cluster:project-id" 
         //RANCHER_CREDS=credentials('rancher-phonebook-credentials')
@@ -334,7 +335,7 @@ pipeline {
                         sh '''
                         helm install rancher rancher-latest/rancher \
                             --namespace cattle-system \
-                            --set hostname=$RANCHER_URL \
+                            --set hostname=$RANCHER \
                             --set tls=external \
                             --set replicas=2
                         '''
