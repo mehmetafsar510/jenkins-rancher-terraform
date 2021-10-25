@@ -34,10 +34,11 @@ pipeline {
                   curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
                   chmod 700 get_helm.sh
                   curl -SsL "https://github.com/rancher/rke/releases/download/v1.1.12/rke_linux-amd64" -o "rke_linux-amd64"
+                  sudo mv rke_linux-amd64 /usr/local/bin/rke
                   chmod +x /usr/local/bin/rke
+                  rke --version
                   chmod +x ./kubectl
                   sudo mv ./kubectl /usr/local/bin
-                  sudo mv rke_linux-amd64 /usr/local/bin/rke
                   ./get_helm.sh
                   curl -SsL "https://github.com/rancher/cli/releases/download/v2.4.9/rancher-linux-amd64-v2.4.9.tar.gz" -o "rancher-cli.tar.gz"
                   tar -zxvf rancher-cli.tar.gz
