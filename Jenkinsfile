@@ -11,7 +11,7 @@ pipeline {
         RANCHER_CONTEXT="phonebook-cluster:project-id" 
         RANCHER_CREDS=credentials('rancher-phonebook-credentials')
         CFN_KEYPAIR="the-doctor"
-        MYSQL_DATABASE_PASSWORD = "Clarusway1"
+        MYSQL_DATABASE_PASSWORD = "Clarusway"
         MYSQL_DATABASE_USER = "admin"
         MYSQL_DATABASE_DB = "phonebook"
         MYSQL_DATABASE_PORT = 3306
