@@ -248,9 +248,11 @@ pipeline {
             agent any
             steps{
                 withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                    script {          
+                        env.JENKINS_IP = sh(script:"curl http://169.254.169.254/latest/meta-data/public-ipv4", returnStdout:true).trim()         
+                    }
                     sh "sed -i 's|{{keypair}}|${CFN_KEYPAIR}|g' main.tf"
                     sh "sed -i 's|{{keypairpub}}|${CFN_KEYPAIR}.pub|g' main.tf"
-                    sh "JENKINS_IP=curl http://169.254.169.254/latest/meta-data/public-ipv4"
                     sh "sed -i 's|{{jenkinsip}}|${JENKINS_IP}|g' locals.tf"
                     sh "terraform init" 
                     sh "terraform apply -input=false -auto-approve"
