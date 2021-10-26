@@ -372,9 +372,9 @@ pipeline {
                 sh "sed -i 's|{{REGISTRY}}|$APP_REPO_NAME/phonebook-result|g' result/result-deployment.yml"
                 sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
                 sh "sed -i 's|{{ns}}|$NM_SP|g' kubernetes/servers-configmap.yaml"
-                sh "sed -i 's|{{ns}}|$NM_SP|g' storage-ns.yml"
-                sh "rancher kubectl apply -f  storage-class.yaml"
-                sh "rancher kubectl apply -f  storage-ns.yml"
+                //sh "sed -i 's|{{ns}}|$NM_SP|g' storage-ns.yml"
+                //sh "rancher kubectl apply -f  storage-class.yaml"
+                //sh "rancher kubectl apply -f  storage-ns.yml"
                 sh "rancher kubectl apply --namespace $NM_SP -f  result"
                 sh "rancher kubectl apply --namespace $NM_SP -f  kubernetes"
             }
