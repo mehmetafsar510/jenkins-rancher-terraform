@@ -379,6 +379,123 @@ pipeline {
                 sh "rancher kubectl apply --namespace $NM_SP -f  kubernetes"
             }
         }
+
+        stage('apply ingress') {
+            steps {
+                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                    echo "Testing if ingress is ready or not"
+                script {
+                    while(true) {
+                        try {
+                          sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress-service.yaml"
+                          sh "rancher kubectl apply --validate=false --namespace $NM_SP -f ingress-service.yaml"
+                          sleep(15)
+                          break
+                        }
+                        catch(Exception) {
+                          echo 'Could not apply ingress please wait'
+                          sleep(5)  
+                        } 
+                    }
+                }
+            }
+        }
+    }
+
+        stage('dns-record-control'){
+            agent any
+            steps{
+                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                    script {
+                        env.ZONE_ID = sh(script:"aws route53 list-hosted-zones-by-name --dns-name $DOMAIN_NAME --query HostedZones[].Id --output text | cut -d/ -f3", returnStdout:true).trim()
+                        env.ELB_DNS = sh(script:"aws route53 list-resource-record-sets --hosted-zone-id $ZONE_ID --query \"ResourceRecordSets[?Name == '\$FQDN.']\" --output text | tail -n 1 | cut -f2", returnStdout:true).trim() 
+                    }
+                    sh "sed -i 's|{{DNS}}|$ELB_DNS|g' deleterecord.json"
+                    sh "sed -i 's|{{FQDN}}|$FQDN|g' deleterecord.json"
+                    sh '''
+                        RecordSet=$(aws route53 list-resource-record-sets   --hosted-zone-id $ZONE_ID   --query ResourceRecordSets[] | grep -i $FQDN) || true
+                        if [ "$RecordSet" != '' ]
+                        then
+                            aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --change-batch file://deleterecord.json
+                        
+                        fi
+                    '''
+                    
+                }                  
+            }
+        }
+
+        stage('dns-record'){
+            agent any
+            steps{
+                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                    script {
+                        env.ELB_DNS = sh(script:'aws elbv2 describe-load-balancers --query LoadBalancers[].DNSName --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()
+                        env.ZONE_ID = sh(script:"aws route53 list-hosted-zones-by-name --dns-name $DOMAIN_NAME --query HostedZones[].Id --output text | cut -d/ -f3", returnStdout:true).trim()   
+                    }
+                    sh "sed -i 's|{{DNS}}|$ELB_DNS|g' dnsrecord.json"
+                    sh "sed -i 's|{{FQDN}}|$FQDN|g' dnsrecord.json"
+                    sh "aws route53 change-resource-record-sets --hosted-zone-id $ZONE_ID --change-batch file://dnsrecord.json"
+                    
+                }                  
+            }
+        }
+
+        stage('ssl-tls-record'){
+            agent any
+            steps{
+                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                    sh "kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
+                    sh "helm repo add jetstack https://charts.jetstack.io"
+                    sh "helm repo update"
+                    sh '''
+                        NameSpace=$(kubectl get namespaces | grep -i cert-manager) || true
+                        if [ "$NameSpace" == '' ]
+                        then
+                            kubectl create namespace cert-manager
+                        else
+                            helm delete cert-manager --namespace cert-manager
+                            kubectl delete namespace cert-manager
+                            kubectl create namespace cert-manager
+                        fi
+                    '''
+                    sh """
+                      helm install cert-manager jetstack/cert-manager \
+                      --namespace cert-manager \
+                      --version v0.11.1 \
+                      --set webhook.enabled=false \
+                      --set installCRDs=true
+                    """
+                    sh """
+                      sudo openssl req -x509 -nodes -days 90 -newkey rsa:2048 \
+                          -out clarusway-cert.crt \
+                          -keyout clarusway-cert.key \
+                          -subj "/CN=$FQDN/O=$SEC_NAME"
+                    """
+                    sh '''
+                        SecretNm=$(kubectl get secrets | grep -i $SEC_NAME) || true
+                        if [ "$SecretNm" == '' ]
+                        then
+                            kubectl create secret --namespace $NM_SP  tls $SEC_NAME \
+                                --key clarusway-cert.key \
+                                --cert clarusway-cert.crt
+                        else
+                            kubectl delete secret --namespace $NM_SP $SEC_NAME
+                            kubectl create secret --namespace $NM_SP tls $SEC_NAME \
+                                --key clarusway-cert.key \
+                                --cert clarusway-cert.crt
+                        fi
+                    '''
+                    sleep(5)
+                    sh "sudo mv -f ingress-service-https.yaml ingress-service.yaml"
+                    sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
+                    sh "rancher kubectl apply --namespace $NM_SP -f ssl-tls-cluster-issuer.yaml"
+                    sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress-service.yaml"
+                    sh "sed -i 's|{{SEC_NAME}}|$SEC_NAME|g' ingress-service.yaml"
+                    sh "rancher kubectl apply --namespace $NM_SP -f ingress-service.yaml"              
+                }                  
+            }
+        }
         
     }
     post {
