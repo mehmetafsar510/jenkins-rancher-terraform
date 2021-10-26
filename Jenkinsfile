@@ -9,8 +9,8 @@ pipeline {
         RANCHER_URL="https://rancher.mehmetafsar.net"
         RANCHER="rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
-        RANCHER_CONTEXT="phonebook-cluster:project-id" 
-        //RANCHER_CREDS=credentials('rancher-phonebook-credentials')
+        RANCHER_CONTEXT="c-zt2mh:p-d9m7t" 
+        RANCHER_CREDS=credentials('rancher-phonebook-credentials')
         CFN_KEYPAIR="the-doctor"
         MYSQL_DATABASE_PASSWORD = "Clarusway"
         MYSQL_DATABASE_USER = "admin"
@@ -330,16 +330,14 @@ pipeline {
                         if [ "$NameSpaces" == '' ]
                         then
                             kubectl create namespace cattle-system
-
-                        fi
-                        '''
-                        sh '''
-                        helm install rancher rancher-latest/rancher \
+                            helm install rancher rancher-latest/rancher \
                             --namespace cattle-system \
                             --set hostname=$RANCHER \
                             --set tls=external \
                             --set bootstrapPassword=mypassword \
                             --set replicas=2
+
+                        fi
                         '''
                         sh "kubectl -n cattle-system get deploy rancher"
                     }
@@ -371,9 +369,12 @@ pipeline {
             steps {
                 echo 'Deploying App on K8s Cluster'
                 sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
+                sh "sed -i 's|{{ns}}|$NM_SP|g' kubernetes/servers-configmap.yaml"
+                sh "sed -i 's|{{ns}}|$NM_SP|g' storage-ns.yml"
                 sh "rancher kubectl apply -f  storage-class.yaml"
-                sh "rancher kubectl apply -f --namespace $NM_SP result"
-                sh "rancher kubectl apply -f --namespace $NM_SP kubernetes"
+                sh "rancher kubectl apply -f  storage-ns.yml"
+                sh "rancher kubectl apply --namespace $NM_SP -f  result"
+                sh "rancher kubectl apply --namespace $NM_SP -f  kubernetes"
             }
         }
         
