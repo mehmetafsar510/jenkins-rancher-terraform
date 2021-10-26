@@ -387,8 +387,9 @@ pipeline {
                 script {
                     while(true) {
                         try {
+                          sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                           sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress-service.yaml"
-                          sh "rancher kubectl apply --validate=false --namespace $NM_SP -f ingress-service.yaml"
+                          sh "rancher kubectl apply --validate=false --namespace $NM_SP -f ingress.yaml"
                           sleep(15)
                           break
                         }
@@ -487,7 +488,7 @@ pipeline {
                         fi
                     '''
                     sleep(5)
-                    sh "sudo mv -f ingress-service-https.yaml ingress-service.yaml"
+                    sh "sudo mv -f ingress-service-https.yaml ingress.yaml"
                     sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                     sh "rancher kubectl apply --namespace $NM_SP -f ssl-tls-cluster-issuer.yaml"
                     sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress-service.yaml"
