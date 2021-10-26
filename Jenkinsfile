@@ -342,8 +342,6 @@ pipeline {
                             --set replicas=2
                         '''
                         sh "kubectl -n cattle-system get deploy rancher"
-
-                        sh '''kubectl get secret --namespace cattle-system bootstrap-secret -o go-template='{{.data.bootstrapPassword|base64decode}}{{ "\n" }}' '''
                     }
                 }
 
