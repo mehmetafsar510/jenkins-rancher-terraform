@@ -21,7 +21,7 @@ pipeline {
         CLUSTER_NAME = "mehmet-cluster"
         FQDN = "phonebook.mehmetafsar.net"
         DOMAIN_NAME = "mehmetafsar.net"
-        NM_SP = "phone"
+        NM_SP = "phonebook"
         GIT_FOLDER = sh(script:'echo ${GIT_URL} | sed "s/.*\\///;s/.git$//"', returnStdout:true).trim()
     }
     stages{
@@ -372,8 +372,8 @@ pipeline {
                 echo 'Deploying App on K8s Cluster'
                 sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW"
                 sh "rancher kubectl apply -f  storage-class.yaml"
-                sh "rancher kubectl apply -f result"
-                sh "rancher kubectl apply -f kubernetes"
+                sh "rancher kubectl apply -f --namespace $NM_SP result"
+                sh "rancher kubectl apply -f --namespace $NM_SP kubernetes"
             }
         }
         
