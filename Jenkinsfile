@@ -311,7 +311,7 @@ pipeline {
                 
                         sh "sed -i 's|{{public}}|${MASTER_INSTANCE_PUBLIC_IP}|g' rancher-cluster.yml"
                         sh "sed -i 's|{{private}}|${MASTER_INSTANCE_PRIVATE_IP}|g' rancher-cluster.yml"
-                        sh 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${JENKINS_HOME}/.ssh/${CFN_KEYPAIR}.pem ubuntu@\"${MASTER_INSTANCE_PUBLIC_IP}" sudo rm -rf /etc/kubernetes/ /var/lib/kubelet/ /var/lib/etcd/'
+                        //sh 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${JENKINS_HOME}/.ssh/${CFN_KEYPAIR}.pem ubuntu@\"${MASTER_INSTANCE_PUBLIC_IP}" sudo rm -rf /etc/kubernetes/ /var/lib/kubelet/ /var/lib/etcd/'
                         sh '''
                         Rancher=$(kubectl get nodes | grep -i worker )  || true
                         if [ "$Rancher" == '' ]
