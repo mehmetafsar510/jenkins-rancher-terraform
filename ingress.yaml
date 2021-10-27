@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: path-based-ingress
   annotations:
-    nginx.ingress.kubernetes.io/default-backend: ingress-nginx-controller
+    nginx.ingress.kubernetes.io/default-backend: ingress-nginx-controller-admission 
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
