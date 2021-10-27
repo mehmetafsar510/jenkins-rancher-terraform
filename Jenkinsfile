@@ -374,7 +374,7 @@ pipeline {
                 sh "sed -i 's|{{ns}}|$NM_SP|g' kubernetes/servers-configmap.yaml"
                 //sh "sed -i 's|{{ns}}|$NM_SP|g' storage-ns.yml"
                 //sh "rancher kubectl apply -f  storage-class.yaml"
-                //sh "rancher kubectl apply -f  storage-ns.yml"
+                //sh "rancher kubectl apply -f  storage-ns.yml" --insecure-skip-tls-verify
                 sh "rancher kubectl apply --namespace $NM_SP -f  result"
                 sh "rancher kubectl apply --namespace $NM_SP -f  kubernetes"
             }
@@ -389,7 +389,7 @@ pipeline {
                         try {
                           sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                           sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress-service.yaml"
-                          sh "rancher kubectl apply --validate=false --namespace $NM_SP -f ingress.yaml"
+                          sh "rancher kubectl apply --insecure-skip-tls-verify  --validate=false --namespace $NM_SP -f ingress.yaml"
                           sleep(15)
                           break
                         }
@@ -431,7 +431,7 @@ pipeline {
             steps{
                 withAWS(credentials: 'mycredentials', region: 'us-east-1') {
                     script {
-                        env.ELB_DNS = sh(script:'aws elbv2 describe-load-balancers --query LoadBalancers[].DNSName --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()
+                        env.ELB_DNS = sh(script:'aws ec2 describe-instances --region ${AWS_REGION} --filters Name=tag-value,Values=rancher-instance  --query Reservations[*].Instances[*].[PublicIpAddress] --output text | sed "s/\\s*None\\s*//g"', returnStdout:true).trim()
                         env.ZONE_ID = sh(script:"aws route53 list-hosted-zones-by-name --dns-name $DOMAIN_NAME --query HostedZones[].Id --output text | cut -d/ -f3", returnStdout:true).trim()   
                     }
                     sh "sed -i 's|{{DNS}}|$ELB_DNS|g' dnsrecord.json"
@@ -489,12 +489,12 @@ pipeline {
                         fi
                     '''
                     sleep(5)
-                    sh "sudo mv -f ingress-service-https.yaml ingress.yaml"
+                    sh "sudo mv -f ingress-https.yaml ingress.yaml"
                     sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                     sh "rancher kubectl apply --namespace $NM_SP -f ssl-tls-cluster-issuer.yaml"
-                    sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress-service.yaml"
-                    sh "sed -i 's|{{SEC_NAME}}|$SEC_NAME|g' ingress-service.yaml"
-                    sh "rancher kubectl apply --namespace $NM_SP -f ingress-service.yaml"              
+                    sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
+                    sh "sed -i 's|{{SEC_NAME}}|$SEC_NAME|g' ingress.yaml"
+                    sh "rancher kubectl apply --namespace $NM_SP -f ingress.yaml"              
                 }                  
             }
         }
