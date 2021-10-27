@@ -46,6 +46,7 @@ pipeline {
                   sudo mv ./rancher-v2.4.9/rancher /usr/local/bin/rancher
                   chmod +x /usr/local/bin/rancher
                   rancher --version
+                  sudo yum install jq -y
                 """
               }
             }
