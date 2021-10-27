@@ -375,6 +375,7 @@ pipeline {
                 sh "sed -i 's|{{ns}}|$NM_SP|g' kubernetes/servers-configmap.yaml"
                 sh "rancher kubectl apply --namespace $NM_SP -f  result"
                 sh "rancher kubectl apply --namespace $NM_SP -f  kubernetes"
+                sh "rancher kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/aws/deploy.yaml"
             }
         }
 
@@ -387,7 +388,7 @@ pipeline {
                         try {
                           sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                           sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
-                          sh "rancher kubectl apply --validate=false -f ingress.yaml"
+                          sh "rancher kubectl apply --validate=false --namespace $NM_SP -f ingress.yaml"
                           sleep(15)
                           break
                         }
