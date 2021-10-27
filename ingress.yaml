@@ -3,9 +3,6 @@ kind: Ingress
 metadata:
   name: path-based-ingress
 spec:
-  defaultBackend:
-    serviceName: ingress-nginx-controller
-    servicePort: 80
   rules:
     - host: {{FQDN}}
       http:
