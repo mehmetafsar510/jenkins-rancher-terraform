@@ -387,7 +387,6 @@ pipeline {
                         try {
                           sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                           sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
-                          sh "rancher kubectl delete --namespace $NM_SP -f ingress.yaml"
                           sh "rancher kubectl apply --validate=false -f ingress.yaml"
                           sleep(15)
                           break
