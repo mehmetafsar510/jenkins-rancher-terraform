@@ -9,7 +9,7 @@ pipeline {
         RANCHER_URL="https://rancher.mehmetafsar.net"
         RANCHER="rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
-        RANCHER_CONTEXT="c-ggmtm:p-97xfk" 
+        RANCHER_CONTEXT="c-q8rvv:p-6pmwl" 
         RANCHER_CREDS=credentials('rancher-phonebook-credentials')
         CFN_KEYPAIR="the-doctor"
         MYSQL_DATABASE_PASSWORD = "Clarusway"
@@ -388,6 +388,7 @@ pipeline {
                           sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                           sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
                           sh "rancher kubectl apply --validate=false --namespace $NM_SP -f ingress.yaml"
+                          sh "rancher kubectl create namespace cert-manager"
                           sleep(15)
                           break
                         }
