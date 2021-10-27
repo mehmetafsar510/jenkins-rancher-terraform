@@ -375,7 +375,6 @@ pipeline {
                 sh "sed -i 's|{{ns}}|$NM_SP|g' kubernetes/servers-configmap.yaml"
                 sh "rancher kubectl apply --namespace $NM_SP -f  result"
                 sh "rancher kubectl apply --namespace $NM_SP -f  kubernetes"
-                sh "rancher kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/aws/deploy.yaml"
             }
         }
 
