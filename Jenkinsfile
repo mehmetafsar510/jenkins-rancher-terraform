@@ -325,6 +325,7 @@ pipeline {
                             kubectl get nodes
                         fi
                         '''
+                        sh "export KUBECONFIG=/var/lib/jenkins/.kube/config"
                         sh "helm repo add rancher-latest https://releases.rancher.com/server-charts/latest"
                         sh "helm repo list"
                         sh '''
@@ -445,7 +446,7 @@ pipeline {
            agent any
            steps{
                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
-                   sh "export KUBECONFIG=phonebook-config" 
+                   sh "export KUBECONFIG=/home/ec2-user/phonebook-config" 
                    sh "kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
                    sh "helm repo add jetstack https://charts.jetstack.io"
                    sh "helm repo update"
