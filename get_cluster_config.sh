@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: ./get_kubeconfig_custom_cluster_rancher2.sh cluster_name
+# Usage: ./get_cluster_config.sh cluster_name
 # Needs to be run on the server running `rancher/rancher` container
 
 # Check if jq exists
@@ -15,7 +15,7 @@ fi
 CLUSTERNAME=$1
 
 # Retrieve Docker container ID of container running `rancher/rancher` image
-CONTID=$(docker ps | grep -E "rancher/rancher:|rancher/rancher |rancher/rancher@|rancher_rancher" | awk '{ print $1 }')
+CONTID=$(docker ps | grep -E "rancher/rancher:|rancher/rancher |rancher/rancher@|rancher_rancher" | awk '{ print $1 }' | tail -n 1)
 echo "Container ID running Rancher is ${CONTID}"
 
 # Validate that we are querying the correct etcd

@@ -18,7 +18,7 @@ pipeline {
         MYSQL_DATABASE_PORT = 3306
         APP_REPO = "phonebook/app"
         APP_REPO_NAME = "mehmetafsar510"
-        CLUSTER_NAME = "mehmet-cluster"
+        CLUSTER_NAME = "rancher"
         FQDN = "phonebook.mehmetafsar.net"
         DOMAIN_NAME = "mehmetafsar.net"
         SEC_NAME = "mehmet-cert"
@@ -445,19 +445,29 @@ pipeline {
        stage('ssl-tls-record'){
            agent any
            steps{
-               withAWS(credentials: 'mycredentials', region: 'us-east-1') { 
-                   sh "kubectl apply --validate=false --kubeconfig /var/lib/jenkins/.kube/phonebook-config -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
+               withAWS(credentials: 'mycredentials', region: 'us-east-1') {
+                   sh '''scp -o StrictHostKeyChecking=no \
+                        -o UserKnownHostsFile=/dev/null \
+                        -i ${JENKINS_HOME}/.ssh/${CFN_KEYPAIR}.pem get_cluster_config.sh  ubuntu@\"${MASTER_INSTANCE_PUBLIC_IP}":/home/ubuntu/
+                    '''
+                   sh 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -i ${JENKINS_HOME}/.ssh/${CFN_KEYPAIR}.pem ubuntu@\"${MASTER_INSTANCE_PUBLIC_IP}" bash get_cluster_config.sh $CLUSTER_NAME'
+                   sleep(5)
+                   sh '''scp -o StrictHostKeyChecking=no \
+                        -o UserKnownHostsFile=/dev/null \
+                        -i ${JENKINS_HOME}/.ssh/${CFN_KEYPAIR}.pem -q ubuntu@\"${MASTER_INSTANCE_PUBLIC_IP}":/home/ubuntu/kubeconfig ${JENKINS_HOME}/.kube/
+                    ''' 
+                   sh "kubectl apply --validate=false --kubeconfig /var/lib/jenkins/.kube/kubeconfig -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
                    sh "helm repo add jetstack https://charts.jetstack.io"
                    sh "helm repo update"
                    sh '''
-                       NameSpace=$(kubectl get namespaces --kubeconfig /var/lib/jenkins/.kube/phonebook-config | grep -i cert-manager) || true
+                       NameSpace=$(kubectl get namespaces --kubeconfig /var/lib/jenkins/.kube/kubeconfig | grep -i cert-manager) || true
                        if [ "$NameSpace" == '' ]
                        then
-                           kubectl create namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
+                           kubectl create namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/kubeconfig
                        else
-                           helm delete cert-manager --namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
-                           kubectl delete namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
-                           kubectl create namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
+                           helm delete cert-manager --namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/kubeconfig
+                           kubectl delete namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/kubeconfig
+                           kubectl create namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/kubeconfig
                        fi
                    '''
                    sh """
@@ -465,7 +475,7 @@ pipeline {
                      --namespace cert-manager \
                      --version v0.11.1 \
                      --set webhook.enabled=false \
-                     --kubeconfig /var/lib/jenkins/.kube/phonebook-config \
+                     --kubeconfig /var/lib/jenkins/.kube/kubeconfig \
                      --set installCRDs=true
                    """
                    sh """
@@ -475,26 +485,26 @@ pipeline {
                          -subj "/CN=$FQDN/O=$SEC_NAME"
                    """
                    sh '''
-                       SecretNm=$(kubectl get secrets --kubeconfig /var/lib/jenkins/.kube/phonebook-config  | grep -i $SEC_NAME) || true
+                       SecretNm=$(kubectl get secrets --kubeconfig /var/lib/jenkins/.kube/kubeconfig  | grep -i $SEC_NAME) || true
                        if [ "$SecretNm" == '' ]
                        then
                            
-                           kubectl create secret --kubeconfig /var/lib/jenkins/.kube/phonebook-config  --namespace $NM_SP  tls $SEC_NAME \
+                           kubectl create secret --kubeconfig /var/lib/jenkins/.kube/kubeconfig  --namespace $NM_SP  tls $SEC_NAME \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        else
-                           kubectl delete secret --namespace $NM_SP $SEC_NAME --kubeconfig /var/lib/jenkins/.kube/phonebook-config
-                           kubectl create secret --namespace $NM_SP tls $SEC_NAME --kubeconfig /var/lib/jenkins/.kube/phonebook-config  \
+                           kubectl delete secret --namespace $NM_SP $SEC_NAME --kubeconfig /var/lib/jenkins/.kube/kubeconfig
+                           kubectl create secret --namespace $NM_SP tls $SEC_NAME --kubeconfig /var/lib/jenkins/.kube/kubeconfig  \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        fi
                    '''
                    sleep(5)
                    sh "sudo mv -f ingress-https.yaml ingress.yaml"
-                   sh "kubectl apply --namespace $NM_SP --kubeconfig /var/lib/jenkins/.kube/phonebook-config  -f ssl-tls-cluster-issuer.yaml"
+                   sh "kubectl apply --namespace $NM_SP --kubeconfig /var/lib/jenkins/.kube/kubeconfig  -f ssl-tls-cluster-issuer.yaml"
                    sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
                    sh "sed -i 's|{{SEC_NAME}}|$SEC_NAME|g' ingress.yaml"
-                   sh "kubectl apply --namespace $NM_SP --kubeconfig /var/lib/jenkins/.kube/phonebook-config  -f ingress.yaml"              
+                   sh "kubectl apply --namespace $NM_SP --kubeconfig /var/lib/jenkins/.kube/kubeconfig  -f ingress.yaml"              
                }                  
            }
        }
