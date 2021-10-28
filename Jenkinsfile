@@ -10,7 +10,6 @@ pipeline {
         RANCHER="rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
         RANCHER_CONTEXT="c-rm2hf:p-zp97q"
-        RANCHER_CONTEXT1="c-rm2hf:p-zp97q"
         RANCHER_CREDS=credentials('rancher-phonebook-credentials')
         CFN_KEYPAIR="the-doctor"
         MYSQL_DATABASE_PASSWORD = "Clarusway"
@@ -445,21 +444,21 @@ pipeline {
            agent any
            steps{
                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
-                   sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT1 --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
-                   sh "rancher kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
+                   sh "export KUBECONFIG=phonebook-config" 
+                   sh "kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
                    sh "helm repo add jetstack https://charts.jetstack.io"
                    sh "helm repo update"
-                   //sh '''
-                   //    NameSpace=$(rancher kubectl get namespaces | grep -i cert-manager) || true
-                   //    if [ "$NameSpace" == '' ]
-                   //    then
-                   //        rancher kubectl create namespace cert-manager
-                   //    else
-                   //        helm delete cert-manager --namespace cert-manager
-                   //        rancher kubectl delete namespace cert-manager
-                   //        rancher kubectl create namespace cert-manager
-                   //    fi
-                   //'''
+                   sh '''
+                       NameSpace=$(kubectl get namespaces | grep -i cert-manager) || true
+                       if [ "$NameSpace" == '' ]
+                       then
+                           kubectl create namespace cert-manager
+                       else
+                           helm delete cert-manager --namespace cert-manager
+                           kubectl delete namespace cert-manager
+                           kubectl create namespace cert-manager
+                       fi
+                   '''
                    sh """
                      helm install cert-manager jetstack/cert-manager \
                      --namespace cert-manager \
@@ -474,27 +473,26 @@ pipeline {
                          -subj "/CN=$FQDN/O=$SEC_NAME"
                    """
                    sh '''
-                       SecretNm=$(rancher kubectl get secrets | grep -i $SEC_NAME) || true
+                       SecretNm=$(kubectl get secrets | grep -i $SEC_NAME) || true
                        if [ "$SecretNm" == '' ]
                        then
-                           rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW
-                           rancher kubectl create secret --namespace $NM_SP  tls $SEC_NAME \
+                           
+                           kubectl create secret --namespace $NM_SP  tls $SEC_NAME \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        else
-                           rancher kubectl delete secret --namespace $NM_SP $SEC_NAME
-                           rancher kubectl create secret --namespace $NM_SP tls $SEC_NAME \
+                           kubectl delete secret --namespace $NM_SP $SEC_NAME
+                           kubectl create secret --namespace $NM_SP tls $SEC_NAME \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        fi
                    '''
                    sleep(5)
                    sh "sudo mv -f ingress-https.yaml ingress.yaml"
-                   sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
-                   sh "rancher kubectl apply --namespace $NM_SP -f ssl-tls-cluster-issuer.yaml"
+                   sh "kubectl apply --namespace $NM_SP -f ssl-tls-cluster-issuer.yaml"
                    sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
                    sh "sed -i 's|{{SEC_NAME}}|$SEC_NAME|g' ingress.yaml"
-                   sh "rancher kubectl apply --namespace $NM_SP -f ingress.yaml"              
+                   sh "kubectl apply --namespace $NM_SP -f ingress.yaml"              
                }                  
            }
        }
