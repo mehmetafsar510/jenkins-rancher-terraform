@@ -9,22 +9,22 @@ spec:
     - host: {{FQDN}}
       http:
         paths:
-        #- path: /choose
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
-        #- path: /update
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
-        #- path: /delete
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
-        #- path: /add
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
+        - path: /choose
+          backend:
+              serviceName: update
+              servicePort: 80
+        - path: /update
+          backend:
+              serviceName: update
+              servicePort: 80
+        - path: /delete
+          backend:
+              serviceName: update
+              servicePort: 80
+        - path: /add
+          backend:
+              serviceName: update
+              servicePort: 80
         - path: /
           backend:
               serviceName: search-flask
