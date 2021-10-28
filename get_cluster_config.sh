@@ -3,7 +3,7 @@
 # Needs to be run on the server running `rancher/rancher` container
 
 # Check if jq exists
-command -v jq >/dev/null 2>&1 || { echo "jq is not installed. Exiting." >&2; exit 1; }
+command -v jq >/dev/null 2>&1 || sudo apt-get install jq -y || { echo "jq is not installed. Exiting." >&2; exit 1; }
 
 # Check if clustername is given
 if [ -z "$1" ]; then
