@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: path-based-ingress
   annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: 'true'
     cert-manager.io/cluster-issuer: letsencrypt
 spec:
   tls:
@@ -13,6 +15,10 @@ spec:
     - host: {{FQDN}}
       http:
         paths:
+        - path: /
+          backend:
+              serviceName: search-flask
+              servicePort: 80
         - path: /choose
           backend:
               serviceName: update
@@ -29,8 +35,5 @@ spec:
           backend:
               serviceName: update
               servicePort: 80
-        - path: /
-          backend:
-              serviceName: search-flask
-              servicePort: 80
+        
 
