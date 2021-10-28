@@ -449,17 +449,17 @@ pipeline {
                    sh "rancher kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
                    sh "helm repo add jetstack https://charts.jetstack.io"
                    sh "helm repo update"
-                   sh '''
-                       NameSpace=$(rancher kubectl get namespaces | grep -i cert-manager) || true
-                       if [ "$NameSpace" == '' ]
-                       then
-                           rancher kubectl create namespace cert-manager
-                       else
-                           helm delete cert-manager --namespace cert-manager
-                           rancher kubectl delete namespace cert-manager
-                           rancher kubectl create namespace cert-manager
-                       fi
-                   '''
+                   //sh '''
+                   //    NameSpace=$(rancher kubectl get namespaces | grep -i cert-manager) || true
+                   //    if [ "$NameSpace" == '' ]
+                   //    then
+                   //        rancher kubectl create namespace cert-manager
+                   //    else
+                   //        helm delete cert-manager --namespace cert-manager
+                   //        rancher kubectl delete namespace cert-manager
+                   //        rancher kubectl create namespace cert-manager
+                   //    fi
+                   //'''
                    sh """
                      helm install cert-manager jetstack/cert-manager \
                      --namespace cert-manager \
