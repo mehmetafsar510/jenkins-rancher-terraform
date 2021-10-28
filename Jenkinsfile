@@ -277,7 +277,7 @@ pipeline {
                         if (ip.length() >= 7) {
                             echo "Rancher Master Public Ip Address Found: $ip"
                             env.MASTER_INSTANCE_PUBLIC_IP = "$ip"
-                            sleep(30)
+                            sleep(10)
                             break
                         }
                     }
@@ -299,7 +299,7 @@ pipeline {
                         if (ip.length() >= 7) {
                             echo "Rancher Master Private Ip Address Found: $ip"
                             env.MASTER_INSTANCE_PRIVATE_IP = "$ip"
-                            sleep(30)
+                            sleep(10)
                             break
                         }
                     }
