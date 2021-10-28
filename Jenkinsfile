@@ -455,9 +455,9 @@ pipeline {
                        then
                            kubectl create namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
                        else
-                           helm delete cert-manager --namespace cert-manager
-                           kubectl delete namespace cert-manager
-                           kubectl create namespace cert-manager
+                           helm delete cert-manager --namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
+                           kubectl delete namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
+                           kubectl create namespace cert-manager --kubeconfig /var/lib/jenkins/.kube/phonebook-config
                        fi
                    '''
                    sh """
@@ -483,8 +483,8 @@ pipeline {
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        else
-                           kubectl delete secret --namespace $NM_SP $SEC_NAME
-                           kubectl create secret --namespace $NM_SP tls $SEC_NAME \
+                           kubectl delete secret --namespace $NM_SP $SEC_NAME --kubeconfig /var/lib/jenkins/.kube/phonebook-config
+                           kubectl create secret --namespace $NM_SP tls $SEC_NAME --kubeconfig /var/lib/jenkins/.kube/phonebook-config  \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        fi
