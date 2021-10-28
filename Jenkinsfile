@@ -485,7 +485,7 @@ pipeline {
                          -subj "/CN=$FQDN/O=$SEC_NAME"
                    """
                    sh '''
-                       SecretNm=$(kubectl get secrets --kubeconfig /var/lib/jenkins/.kube/kubeconfig  | grep -i $SEC_NAME) || true
+                       SecretNm=$(kubectl get secrets --kubeconfig /var/lib/jenkins/.kube/kubeconfig --namespace $NM_SP  | grep -i $SEC_NAME) || true
                        if [ "$SecretNm" == '' ]
                        then
                            
