@@ -445,16 +445,15 @@ pipeline {
        stage('ssl-tls-record'){
            agent any
            steps{
-               withAWS(credentials: 'mycredentials', region: 'us-east-1') {
-                   sh "export KUBECONFIG=/home/ec2-user/phonebook-config" 
-                   sh "kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
+               withAWS(credentials: 'mycredentials', region: 'us-east-1') { 
+                   sh "kubectl apply --validate=false --kubeconfig /home/ec2-user/phonebook-config -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
                    sh "helm repo add jetstack https://charts.jetstack.io"
                    sh "helm repo update"
                    sh '''
-                       NameSpace=$(kubectl get namespaces | grep -i cert-manager) || true
+                       NameSpace=$(kubectl get namespaces --kubeconfig /home/ec2-user/phonebook-config | grep -i cert-manager) || true
                        if [ "$NameSpace" == '' ]
                        then
-                           kubectl create namespace cert-manager
+                           kubectl create namespace cert-manager --kubeconfig /home/ec2-user/phonebook-config
                        else
                            helm delete cert-manager --namespace cert-manager
                            kubectl delete namespace cert-manager
@@ -466,6 +465,7 @@ pipeline {
                      --namespace cert-manager \
                      --version v0.11.1 \
                      --set webhook.enabled=false \
+                     --kubeconfig /home/ec2-user/phonebook-config \
                      --set installCRDs=true
                    """
                    sh """
@@ -475,11 +475,11 @@ pipeline {
                          -subj "/CN=$FQDN/O=$SEC_NAME"
                    """
                    sh '''
-                       SecretNm=$(kubectl get secrets | grep -i $SEC_NAME) || true
+                       SecretNm=$(kubectl get secrets --kubeconfig /home/ec2-user/phonebook-config  | grep -i $SEC_NAME) || true
                        if [ "$SecretNm" == '' ]
                        then
                            
-                           kubectl create secret --namespace $NM_SP  tls $SEC_NAME \
+                           kubectl create secret --kubeconfig /home/ec2-user/phonebook-config  --namespace $NM_SP  tls $SEC_NAME \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
                        else
@@ -491,10 +491,10 @@ pipeline {
                    '''
                    sleep(5)
                    sh "sudo mv -f ingress-https.yaml ingress.yaml"
-                   sh "kubectl apply --namespace $NM_SP -f ssl-tls-cluster-issuer.yaml"
+                   sh "kubectl apply --namespace $NM_SP --kubeconfig /home/ec2-user/phonebook-config  -f ssl-tls-cluster-issuer.yaml"
                    sh "sed -i 's|{{FQDN}}|$FQDN|g' ingress.yaml"
                    sh "sed -i 's|{{SEC_NAME}}|$SEC_NAME|g' ingress.yaml"
-                   sh "kubectl apply --namespace $NM_SP -f ingress.yaml"              
+                   sh "kubectl apply --namespace $NM_SP --kubeconfig /home/ec2-user/phonebook-config  -f ingress.yaml"              
                }                  
            }
        }
