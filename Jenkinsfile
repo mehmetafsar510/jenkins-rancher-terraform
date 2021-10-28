@@ -513,5 +513,8 @@ pipeline {
             echo 'Deleting all local images'
             sh 'docker image prune -af'
         }
+        success {
+            echo "You are Greattt...You can visit https://$FQDN"
+        }
     }
 }
