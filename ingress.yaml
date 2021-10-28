@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: path-based-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
     kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/use-regex: 'true'
 spec:
@@ -11,23 +10,23 @@ spec:
     - host: {{FQDN}}
       http:
         paths:
-        #- path: /choose
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
-        #- path: /update
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
-        #- path: /delete
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
-        #- path: /add
-        #  backend:
-        #      serviceName: update
-        #      servicePort: 80
         - path: /
           backend:
               serviceName: search-flask
+              servicePort: 80 
+        - path: /choose
+          backend:
+              serviceName: update
               servicePort: 80
+        - path: /update
+          backend:
+              serviceName: update
+              servicePort: 80
+        - path: /delete
+          backend:
+              serviceName: update
+              servicePort: 80
+        - path: /add
+          backend:
+              serviceName: update
+              servicePort: 80 
