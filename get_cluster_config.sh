@@ -62,8 +62,6 @@ else
   exit 1
 fi
 
-# Show kubeconfig
-cat kubeconfig
 
 if command -v kubectl >/dev/null 2>&1; then
     # Run kubectl against kubeconfig
