@@ -9,7 +9,8 @@ pipeline {
         RANCHER_URL="https://rancher.mehmetafsar.net"
         RANCHER="rancher.mehmetafsar.net"
         // Get the project-id from Rancher UI (petclinic-cluster-staging namespace, View in API, copy projectId )
-        RANCHER_CONTEXT="c-rm2hf:p-zp97q" 
+        RANCHER_CONTEXT="c-rm2hf:p-zp97q"
+        RANCHER_CONTEXT1="c-rm2hf:p-9nkwl"
         RANCHER_CREDS=credentials('rancher-phonebook-credentials')
         CFN_KEYPAIR="the-doctor"
         MYSQL_DATABASE_PASSWORD = "Clarusway"
@@ -444,7 +445,7 @@ pipeline {
            agent any
            steps{
                withAWS(credentials: 'mycredentials', region: 'us-east-1') {
-                   sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
+                   sh "rancher login $RANCHER_URL --context $RANCHER_CONTEXT1 --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW" 
                    sh "rancher kubectl apply --validate=false -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.11/deploy/manifests/00-crds.yaml"
                    sh "helm repo add jetstack https://charts.jetstack.io"
                    sh "helm repo update"
@@ -476,6 +477,7 @@ pipeline {
                        SecretNm=$(rancher kubectl get secrets | grep -i $SEC_NAME) || true
                        if [ "$SecretNm" == '' ]
                        then
+                           rancher login $RANCHER_URL --context $RANCHER_CONTEXT --token $RANCHER_CREDS_USR:$RANCHER_CREDS_PSW
                            rancher kubectl create secret --namespace $NM_SP  tls $SEC_NAME \
                                --key clarusway-cert.key \
                                --cert clarusway-cert.crt
