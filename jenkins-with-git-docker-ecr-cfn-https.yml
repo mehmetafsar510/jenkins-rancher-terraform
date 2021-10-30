@@ -181,7 +181,7 @@ Resources:
                 proxy_buffering off; # Required for HTTP-based CLI to work over SSL
               }
             }
-            "EOF"
+            EOF"
             systemctl enable --now nginx
             systemctl restart nginx
             export DOMAIN="${FullDomainName}"
