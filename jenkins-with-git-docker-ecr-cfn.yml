@@ -128,6 +128,14 @@ Resources:
           mv ./kubectl /usr/local/bin
           curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
           mv /tmp/eksctl /usr/local/bin
+
+  JENKİNSERVERIP:
+    Type: AWS::EC2::EIP
+  IPAssoc:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      InstanceId: !Ref 'JenkinsServer'
+      EIP: !Ref 'JENKİNSERVERIP'
           
           
 Outputs:
