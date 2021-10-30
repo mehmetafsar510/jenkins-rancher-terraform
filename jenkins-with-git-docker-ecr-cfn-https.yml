@@ -22,7 +22,7 @@ Parameters:
     Description: The full domain name e.g. phonebook.clarusway.us
     AllowedPattern: (?!-)[a-zA-Z0-9-.]{1,63}(?<!-)
     ConstraintDescription: must be a valid DNS zone name.
-    Default: jenkins.mehmetafsar.net
+    Default: jenkin.mehmetafsar.net
   OperatorEMail:
     Description: EMail address to notify if there are any scaling operations
     Type: String
@@ -162,7 +162,7 @@ Resources:
             # Jenkins Nginx Proxy configuration
             #################################################
             upstream jenkins {
-              server ${JENKİNSERVERIP}:8080 fail_timeout=0;
+              server ${JENKINSERVERIP}:8080 fail_timeout=0;
             }
 
             server {
@@ -191,20 +191,21 @@ Resources:
             echo '0 12 * * * /usr/bin/certbot renew --quiet' >> /tmp/mycrontab
             crontab /tmp/mycrontab
 
-  JENKİNSERVERIP:
+  JENKINSERVERIP:
     Type: AWS::EC2::EIP
   IPAssoc:
     Type: AWS::EC2::EIPAssociation
     Properties:
       InstanceId: !Ref 'JenkinsServer'
-      EIP: !Ref 'JENKİNSERVERIP'
+      EIP: !Ref 'JENKINSERVERIP'
   
   myDNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId : !Ref DomainName
       Name: !Ref FullDomainName
-      ResourceRecords: !Ref JENKİNSERVERIP
+      ResourceRecords: 
+      - !Ref JENKINSERVERIP
       TTL: 900
       Type: A
           
@@ -213,4 +214,5 @@ Outputs:
   JenkinsURL:
     Description: Jenkins Server URL
     Value: !Sub 
-      - https://${FullDomainName}
+      - https://${PublicAddress}
+      - PublicAddress: !Ref FullDomainName
