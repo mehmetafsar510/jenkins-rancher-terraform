@@ -32,29 +32,6 @@ resource "aws_iam_role" "role_for_master" {
   }
 }
 
-resource "aws_iam_role" "role_for_worker" {
-  name = "role_worker_k8s"
-
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
-
-  tags = {
-    Name = "role_for_worker"
-  }
-}
 
 resource "aws_iam_policy_attachment" "attach_for_master" {
   name       = "attachment_for_master"
